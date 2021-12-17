@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_app/widget/login.dart';
+import 'package:inventory_app/widget/splash_screen.dart';
 
 void main() {
   runApp(InventoryApp());
@@ -15,7 +15,7 @@ class InventoryApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Login()
+      home: SplashScreen()
     );
   }
 }
