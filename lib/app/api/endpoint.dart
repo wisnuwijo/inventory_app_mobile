@@ -7,4 +7,6 @@ class EndPoint {
   static String update = mainEndPoint + "inventory/update";
   static String delete = mainEndPoint + "inventory/delete";
   static String exportPdf = mainEndPoint + "inventory/export_pdf";
+  
+  static String updateFcmToken = mainEndPoint + "user/update_token";
 }

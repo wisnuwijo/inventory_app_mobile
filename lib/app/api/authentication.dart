@@ -48,5 +48,8 @@ class Authentication {
     return data;
   }
 
-  Future logout() async {}
+  Future logout() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    _prefs.clear();
+  }
 }

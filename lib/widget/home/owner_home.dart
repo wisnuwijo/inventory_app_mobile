@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:inventory_app/app/api/authentication.dart';
 import 'package:inventory_app/app/api/inventory_api.dart';
 import 'package:inventory_app/app/api/inventory_api_offline.dart';
+import 'package:inventory_app/app/helper/notification.dart';
 import 'package:inventory_app/widget/add_inventory.dart';
 import 'package:inventory_app/widget/detail_inventory.dart';
+import 'package:inventory_app/widget/login.dart';
 import 'package:inventory_app/widget/pdf_viewer.dart';
 
 class OwnerHome extends StatefulWidget {
@@ -20,6 +23,19 @@ class _OwnerHomeState extends State<OwnerHome> {
 
   @override
   void initState() {
+    final firebaseMessaging = FCM();
+    firebaseMessaging.setNotifications();
+
+    firebaseMessaging.streamCtlr.stream.listen((notification) {
+      print("stream : $notification");
+    });
+    firebaseMessaging.bodyCtlr.stream.listen((notification) {
+      print("body : $notification");
+    });
+    firebaseMessaging.titleCtlr.stream.listen((notification) {
+      print("title : $notification");
+    });
+    
     _inventoryList = InventoryApi().showList();
     super.initState();
   }
@@ -98,7 +114,7 @@ class _OwnerHomeState extends State<OwnerHome> {
   _synchronizeData() async {
     _showMsg('Memproses ...', []);
 
-    int _success = 0, _failed = 0;
+    int _success = 0;
     List<Map> _offlineData = await InventoryApiOffline().offlineData();
     for (var i = 0; i < _offlineData.length; i++) {
       final _inventory = _offlineData[i];
@@ -125,8 +141,6 @@ class _OwnerHomeState extends State<OwnerHome> {
       if (_sync != null && _sync.data["code"] == 200) {
         _success += 1;
         await InventoryApiOffline().setToOnline(_inventory['id']);
-      } else {
-        _failed += 1;
       }
     }
 
@@ -241,6 +255,36 @@ class _OwnerHomeState extends State<OwnerHome> {
       )
     ]);
   }
+
+  _showOption() {
+    return showDialog(
+      context: context, 
+      builder: (context) => AlertDialog(
+        title: Text('Opsi'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text('Keluar'),
+              onTap: () async {
+                await Authentication().logout();
+                Navigator.pushReplacement(context, MaterialPageRoute(
+                  builder: (context) => Login()
+                ));
+              },
+            ),
+            ListTile(
+              title: Text('Download PDF'),
+              onTap: () {
+                Navigator.pop(context);
+                _downloadFile();
+              },
+            )
+          ],
+        ),
+      )
+    );
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -258,8 +302,8 @@ class _OwnerHomeState extends State<OwnerHome> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.download), 
-            onPressed: () => _downloadFile()
+            icon: Icon(Icons.more_vert), 
+            onPressed: () => _showOption()
           )
         ],
       ),
